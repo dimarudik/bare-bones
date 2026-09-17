@@ -1,0 +1,58 @@
+FROM ubuntu:22.04
+
+ENV DEBIAN_FRONTEND=noninteractive
+
+# 1. Устанавливаем базовые пакеты и локали
+RUN apt-get update && apt-get install -y \
+    curl \
+    ca-certificates \
+    lsb-release \
+    locales \
+    language-pack-ru \
+    gnupg \
+    && rm -rf /var/lib/apt/lists/*
+
+RUN locale-gen ru_RU.UTF-8 && \
+    locale-gen en_US.UTF-8 && \
+    update-locale LANG=en_US.UTF-8
+
+# 2. Подключаем официальный репозиторий PostgreSQL
+RUN apt-get update && apt-get install -y postgresql-common && \
+    yes | /usr/share/postgresql-common/pgdg/apt.postgresql.org.sh
+
+# 3. Устанавливаем PostgreSQL 12
+RUN apt-get update && apt-get install -y \
+    postgresql-12 \
+    postgresql-contrib-12 \
+    && rm -rf /var/lib/apt/lists/*
+
+# 4. Очищаем дефолтную базу
+RUN rm -rf /var/lib/postgresql/12/main/*
+
+# 5. Включаем hot_standby в шаблоне конфигурации
+RUN echo "hot_standby = on" >> /etc/postgresql/12/main/postgresql.conf
+
+EXPOSE 5432
+
+# Создаем скрипт, который выполнит pg_basebackup ДИНАМИЧЕСКИ в рантайме
+RUN echo '#!/bin/bash\n\
+if [ ! -f /var/lib/postgresql/12/main/PG_VERSION ]; then\n\
+  echo "Динамически стягиваем бэкап с работающего pg-master..."\n\
+  PGPASSWORD=rep_pass pg_basebackup -h pg-master -U replicator -D /var/lib/postgresql/12/main/ -Fp -Xs -R\n\
+  chown -R postgres:postgres /var/lib/postgresql/12/main\n\
+  echo "local all all trust" > /etc/postgresql/12/main/pg_hba.conf\n\
+  echo "host all all 0.0.0.0/0 trust" >> /etc/postgresql/12/main/pg_hba.conf\n\
+  echo "host replication all 0.0.0.0/0 trust" >> /etc/postgresql/12/main/pg_hba.conf\n\
+  chown postgres:postgres /etc/postgresql/12/main/pg_hba.conf\n\
+fi\n\
+\n\
+echo "Запускаем PostgreSQL под PID 2 силами контролирующего bash-скрипта..."\n\
+su - postgres -c "/usr/lib/postgresql/12/bin/postgres -D /var/lib/postgresql/12/main -c config_file=/etc/postgresql/12/main/postgresql.conf -c hba_file=/etc/postgresql/12/main/pg_hba.conf -c listen_addresses=* &"\n\
+\n\
+echo "Скрипт переходит в бесконечный цикл удержания PID 1 в Docker..."\n\
+tail -f /dev/null' > /start-replica.sh && chmod +x /start-replica.sh
+
+CMD ["/start-replica.sh"]
+
+# docker build -t local-pg12-replica-ubuntu22 -f Dockerfile.replica .
+# docker run -it --name pg-replica-debug local-pg14-replica-ubuntu22 /bin/bash
