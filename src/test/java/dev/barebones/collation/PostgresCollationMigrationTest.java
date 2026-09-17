@@ -2,7 +2,6 @@ package dev.barebones.collation;
 
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -31,12 +30,10 @@ public class PostgresCollationMigrationTest {
             .withNetworkAliases("pg-master")
             .withCreateContainerCmdModifier(cmd -> cmd.withPlatform("linux/amd64"))
             .withEnv("POSTGRESQL_USER", "migration_user")
-//            .withEnv("POSTGRESQL_ADMIN_PASSWORD", "postgres")
             .withEnv("POSTGRESQL_DATABASE", "test")
             .withEnv("POSTGRESQL_PASSWORD", "")
             .withExposedPorts(5432)
             .waitingFor(Wait.forLogMessage(".*redirecting log output to logging collector process.*\\n", 1));
-//            .waitingFor(Wait.forLogMessage(".*database system is ready to accept connections.*\\n", 1));
 
     private static final GenericContainer<?> replica = new GenericContainer<>("local-pg12-replica-ubuntu22")
             .withNetwork(network)
