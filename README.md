@@ -1,25 +1,30 @@
 # 🦴 bare-bones
 
-> **bare-bones** *(idiom)*: stripped of text, fluff, or non-essential elements; the bare minimum; the absolute core.
+🌐 [English version](./README.EN.md)
 
-This repository is a curated collection of hardcore production-grade engineering deep dives, stripped down to their absolute core. No marketing fluff, no basic tutorials, and no "hello world" templates. Only minimal reproducible examples of non-trivial system behaviors, silent data corruptions, and architectural pitfalls.
+> **bare-bones** *(идиома)*: очищенный от текста, шелухи или второстепенных элементов; самый минимум; абсолютное ядро.
 
-Each directory is a self-contained lab with its own infrastructure (Docker/Testcontainers) and code, allowing you to reproduce, break, and fix complex behaviors locally.
+Этот репозиторий представляет собой курируемую коллекцию хардкорных глубоких погружений в инженерию промышленного уровня (production-grade), очищенных до своего абсолютного ядра. Никакой маркетинговой шелухи, никаких базовых руководств и никаких шаблонов в стиле "hello world". Только минимальные воспроизводимые примеры нетривиального поведения систем, скрытого повреждения данных и архитектурных ловушек.
+
+Каждая директория здесь — это изолированная лабораторная работа со своей собственной инфраструктурой (Docker/Testcontainers) и кодом, позволяющая вам воспроизводить, ломать и чинить сложные сценарии поведения систем локально.
 
 ---
 
-## 🗂️ Lab Directory
+## 🗂️ Список лабораторных работ (Lab Directory)
 
-### 🛢️ Databases & Storage
+### 🛢️ Базы данных и хранение (Databases & Storage)
 
 * **[PostgreSQL 12 Collation Mismatch](./src/test/java/dev/barebones/collation)**
-  Reproducing silent B-Tree index corruption during logical/physical migration from CentOS 7 (`glibc 2.17`) to Ubuntu 22.04 (`glibc 2.35`).
-    * *Fix validated:* Zero-downtime migration via deterministic **ICU Collations** combined with a cold **Single-User Mode system catalog (`pg_database`) patch**.
+  Воспроизведение скрытого повреждения индексов B-Tree во время логической/физической миграции с CentOS 7 (`glibc 2.17`) на Ubuntu 22.04 (`glibc 2.35`).
+    * *Подтвержденное решение:* Миграция с нулевым простоем (zero-downtime) с помощью детерминированных **ICU-локалей** в сочетании с быстрым патчем системного каталога (`pg_database`) в режиме **Single-User**.
+
+* **[PostgreSQL Synchronous Commit Ghost (В процессе)](#)**
+  Симуляция парадокса распределенных систем: что происходит, когда мастер-база данных успешно сбрасывает транзакцию локально, но синхронная реплика отстает, а клиент агрессивно обрывает соединение (`Ctrl+C` / таймаут).
 
 ---
 
-## 🎯 Philosophy
+## 🎯 Философия (Philosophy)
 
-1. **Isolate:** Every problem must be completely decoupled from external infrastructure.
-2. **Reproduce:** If it cannot be consistently reproduced via a single JUnit/Testcontainers run, it doesn't belong here.
-3. **Fix:** Do not just break things. Provide a production-ready, verified remediation strategy.
+1. **Изолировать (Isolate):** Каждая проблема должна быть полностью отделена от общей внешней инфраструктуры.
+2. **Воспроизводить (Reproduce):** Если проблему нельзя стабильно и последовательно воспроизвести с помощью одного запуска JUnit/Testcontainers, ей здесь не место.
+3. **Чинить (Fix):** Не нужно просто ломать вещи. Предоставьте готовое к продакшену, проверенное решение для исправления ситуации.
