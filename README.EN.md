@@ -18,7 +18,7 @@ Each directory is a self-contained lab with its own infrastructure (Docker/Testc
   Reproducing silent B-Tree index corruption during logical/physical migration from CentOS 7 (`glibc 2.17`) to Ubuntu 22.04 (`glibc 2.35`).
     * *Fix validated:* Zero-downtime migration via deterministic **ICU Collations** combined with a cold **Single-User Mode system catalog (`pg_database`) patch**.
 
-* **[PostgreSQL 17 Synchronous Commit Ghost](./src/test/java/dev/barebones/ghost)**
+* **[PostgreSQL 17 Synchronous Commit Ghost](./src/test/java/dev/barebones/ghost/README.EN.md)**
   Simulating a distributed systems paradox: the master database flushes a transaction locally, but when the synchronous replica lags and the client cancels the request (`Ctrl+C` / `Statement.cancel()`), PostgreSQL emits only a `SQLWarning` instead of throwing an exception. Upon master crash and Patroni failover, `pg_rewind` permanently wipes this ghost commit from disk.
   * *Fix validated:* Mandatory interception of `SQLWarning` (`01000`) combined with a **Reconciliation Queue** pattern and client-side `idempotency_key` tracking to asynchronously verify transaction state once the cluster stabilizes.
 
