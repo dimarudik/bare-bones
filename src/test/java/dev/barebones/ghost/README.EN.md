@@ -1,7 +1,5 @@
 # 👻 Integration Test Stand: Synchronous Commit Ghosts & `pg_rewind` Rollbacks in PostgreSQL 17 + Patroni
 
-🌐 [Русская версия](./README.md)
-
 This directory contains an end-to-end integration JUnit test powered by **Testcontainers** and **JDBC** that reproduces one of the most insidious failure modes in high-availability PostgreSQL clusters: **the silent disappearance of a locally committed transaction** when a client disconnects during synchronous replication.
 
 The test not only proves data loss following an automatic failover and `pg_rewind` execution, but also outlines an architectural pattern to safeguard applications against this state of uncertainty.
